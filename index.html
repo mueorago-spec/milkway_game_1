@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>말랑말랑 QWER 리듬파티 - 사랑하는 당신에게</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cute Rounded Korean Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gamja+Flower&family=Gaegu:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Jua', sans-serif;
+            background: linear-gradient(145deg, #fff5e4 0%, #ffe3ec 48%, #e3f4ff 100%);
+            color: #5c4b51;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-gaegu {
+            font-family: 'Gaegu', cursive;
+        }
+        .font-gamja {
+            font-family: 'Gamja Flower', cursive;
+        }
+        /* Chiikawa Soft Marshmallow Card */
+        .jelly-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 4px solid #ffffff;
+            box-shadow: 0 12px 28px rgba(244, 162, 184, 0.32), inset 0 -4px 10px rgba(255, 228, 236, 0.6);
+        }
+        /* Bouncy Jelly Button */
+        .jelly-btn {
+            box-shadow: 0 5px 0px rgba(180, 140, 155, 0.28);
+            transition: transform 0.07s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.07s ease;
+            touch-action: manipulation;
+        }
+        .jelly-btn:hover {
+            transform: translateY(-1px);
+        }
+        .jelly-btn:active {
+            transform: translateY(4px) scale(0.97);
+            box-shadow: 0 1px 0px rgba(180, 140, 155, 0.28);
+        }
+        /* Character Lane Key Active States */
+        .lane-btn-0.active { background-color: #ffd1dc !important; transform: translateY(6px) scale(0.95); box-shadow: 0 1px 0 #ff9eb5; }
+        .lane-btn-1.active { background-color: #fff0b3 !important; transform: translateY(6px) scale(0.95); box-shadow: 0 1px 0 #ffd166; }
+        .lane-btn-2.active { background-color: #cdeaff !important; transform: translateY(6px) scale(0.95); box-shadow: 0 1px 0 #8ecae6; }
+        .lane-btn-3.active { background-color: #ccf5d8 !important; transform: translateY(6px) scale(0.95); box-shadow: 0 1px 0 #80ed99; }
+
+        /* Floating Animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #ffe3ec;
+            height: 10px;
+            border-radius: 999px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ff7aa2;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(255, 122, 162, 0.5);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4">
+
+    <!-- Top Header Bar -->
+    <header class="w-full max-w-4xl flex justify-between items-center z-20 py-2 px-4 sm:px-6 jelly-panel rounded-full">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl sm:text-3xl animate-bounce">🌸</span>
+            <div>
+                <h1 class="text-lg sm:text-2xl font-bold text-pink-500 tracking-wide leading-tight">
+                    말랑말랑 <span class="text-sky-500">QWER</span> 리듬파티
+                </h1>
+                <p id="currentSongBadge" class="text-[11px] sm:text-xs text-amber-600 font-bold truncate max-w-[170px] sm:max-w-[300px]">
+                    🎵 사랑하는 당신에게 준비 중...
+                </p>
+            </div>
+        </div>
+        
+        <!-- Header Action Buttons -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5">
+            <!-- Pause Button (Visible during gameplay) -->
+            <button id="btnPause" class="hidden jelly-btn bg-amber-300 hover:bg-amber-400 text-amber-900 font-bold py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-pause"></i>
+                <span class="hidden sm:inline">일시정지</span>
+            </button>
+
+            <!-- Upload Backup Button -->
+            <label for="mediaFileInput" class="cursor-pointer jelly-btn bg-pink-400 hover:bg-pink-500 text-white font-bold py-1.5 px-3 sm:px-4 rounded-full text-xs sm:text-sm flex items-center gap-1.5" title="다른 노래 MP3/WAV 파일 불러오기">
+                <i class="fa-solid fa-folder-open"></i>
+                <span class="hidden sm:inline">다른 곡 올리기</span>
+                <span class="sm:hidden">업로드</span>
+            </label>
+            <input type="file" id="mediaFileInput" accept="audio/*,video/webm,video/mp4,.webm,.mp3,.wav,.ogg,.m4a" class="hidden">
+
+            <!-- Settings Button -->
+            <button id="btnSettings" class="jelly-btn p-2 sm:p-2.5 text-pink-500 rounded-full bg-pink-100 hover:bg-pink-200" title="게임 설정">
+                <i class="fa-solid fa-gear text-sm sm:text-base"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Rhythm Stage -->
+    <main class="relative w-full max-w-3xl flex-1 my-2 flex flex-col items-center justify-center overflow-hidden">
+
+        <!-- Game Container -->
+        <div id="gameContainer" class="relative w-full h-full max-h-[700px] jelly-panel rounded-[2rem] overflow-hidden flex flex-col items-center justify-center">
+            
+            <!-- Soft Pastel Floating Bubbles Background Canvas -->
+            <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+            <!-- Main Rhythm Highway Canvas -->
+            <canvas id="rhythmCanvas" class="relative h-full z-10"></canvas>
+
+            <!-- In-Game HUD (Score, Combo, Heart HP, Lyrics) -->
+            <div id="hudOverlay" class="absolute top-3 left-3 right-3 flex flex-col gap-2 z-20 pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="flex justify-between items-start">
+                    <!-- Heart Health Gauge & Time -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="bg-white/90 px-3 py-1.5 rounded-full border-2 border-pink-200 flex items-center gap-2 shadow-sm">
+                            <span class="text-rose-500 text-base sm:text-lg animate-pulse">❤️</span>
+                            <div class="w-24 sm:w-32 bg-pink-100 h-3 rounded-full overflow-hidden p-0.5">
+                                <div id="hpBar" class="bg-gradient-to-r from-pink-400 to-rose-400 h-full w-full rounded-full transition-all duration-150"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/85 px-3 py-0.5 rounded-full border border-sky-200 text-[11px] sm:text-xs text-sky-600 font-bold w-fit">
+                            ⏱️ <span id="timeDisplay">00:00</span> / <span id="totalTimeDisplay">03:38</span>
+                        </div>
+                    </div>
+
+                    <!-- Score & Combo -->
+                    <div class="text-right bg-white/90 px-3.5 py-1.5 rounded-2xl border-2 border-pink-200 shadow-sm">
+                        <div class="text-xl sm:text-3xl font-black text-pink-500 tracking-wider leading-none" id="scoreDisplay">
+                            0000000
+                        </div>
+                        <div class="flex justify-end items-baseline gap-1 mt-0.5">
+                            <span id="comboDisplay" class="text-xl sm:text-2xl font-bold text-amber-500">0</span>
+                            <span class="text-xs font-bold text-amber-400">콤보!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Lyrics Caption Banner -->
+                <div id="lyricsBanner" class="mx-auto bg-white/90 border-2 border-amber-200 px-4 py-1 rounded-full shadow-sm text-center max-w-[92%] transition-all duration-300">
+                    <span id="lyricsText" class="text-xs sm:text-base text-amber-700 font-bold">🎵 사랑하는 당신에게 ~ ♪</span>
+                </div>
+            </div>
+
+            <!-- Judgment Praise Pop Text -->
+            <div id="judgmentDisplay" class="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center transform scale-0 transition-transform duration-100 font-gaegu text-4xl sm:text-6xl font-bold tracking-wider drop-shadow-[0_3px_0_rgba(255,255,255,1)]">
+                우와! 최고야! ✨
+            </div>
+
+            <!-- Countdown Overlay (3, 2, 1, 시작!) -->
+            <div id="countdownOverlay" class="absolute inset-0 z-35 hidden flex-col items-center justify-center bg-white/70 backdrop-blur-sm pointer-events-none">
+                <div id="countdownBadge" class="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 border-8 border-white shadow-xl flex items-center justify-center text-white font-black text-5xl sm:text-6xl animate-bounce">
+                    3
+                </div>
+                <p id="countdownSubText" class="mt-3 text-base sm:text-xl font-extrabold text-pink-600 bg-white/95 px-4 py-1.5 rounded-full border-2 border-pink-200 shadow-sm">
+                    준비하세요! 곧 시작해요 🎵
+                </p>
+            </div>
+
+            <!-- 1. Start / Main Menu Overlay -->
+            <div id="startOverlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 sm:p-6 bg-[#fffaf2]/95 backdrop-blur-md text-center overflow-y-auto">
+                <!-- Cute Mascot Header -->
+                <div class="animate-float mb-2 flex items-center justify-center gap-2">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-pink-100 border-4 border-white shadow-md flex flex-col items-center justify-center relative">
+                        <div class="absolute -top-2 left-2 w-4 h-4 rounded-full bg-pink-200 border-2 border-white"></div>
+                        <div class="absolute -top-2 right-2 w-4 h-4 rounded-full bg-pink-200 border-2 border-white"></div>
+                        <span class="text-2xl sm:text-3xl font-bold text-gray-700">• ᴗ •</span>
+                        <span class="text-[10px] text-pink-400 font-bold">먼작귀</span>
+                    </div>
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-amber-100 border-4 border-white shadow-md flex flex-col items-center justify-center relative">
+                        <div class="absolute -top-4 left-3 w-3 h-6 rounded-full bg-amber-200 border-2 border-white"></div>
+                        <div class="absolute -top-4 right-3 w-3 h-6 rounded-full bg-amber-200 border-2 border-white"></div>
+                        <span class="text-2xl sm:text-3xl font-bold text-gray-700">• ㅂ •</span>
+                        <span class="text-[10px] text-amber-500 font-bold">토끼</span>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-pink-500 mb-1">
+                    말랑말랑 QWER 리듬파티!
+                </h2>
+                <p class="text-gray-500 text-xs sm:text-sm max-w-md mb-3 leading-relaxed">
+                    아동부 친구들을 위한 귀여운 젤리 리듬게임이에요!<br>
+                    버튼을 누르면 노래와 함께 젤리 노트가 내려와요 💖
+                </p>
+
+                <!-- Difficulty Quick Selector on Main Screen -->
+                <div class="bg-white/90 border-2 border-pink-200 rounded-2xl p-2.5 mb-3.5 w-full max-w-sm shadow-sm">
+                    <div class="text-xs font-bold text-pink-400 mb-1.5">✨ 난이도 선택</div>
+                    <div class="grid grid-cols-3 gap-1.5" id="mainDifficultyGroup">
+                        <button type="button" data-diff="1" class="diff-chip jelly-btn bg-pink-400 text-white py-1.5 px-2 rounded-xl text-xs sm:text-sm font-bold">
+                            🐣 쉬움<br><span class="text-[10px] font-normal">유치부/저학년</span>
+                        </button>
+                        <button type="button" data-diff="2" class="diff-chip jelly-btn bg-pink-50 text-pink-500 py-1.5 px-2 rounded-xl text-xs sm:text-sm font-bold">
+                            🐰 보통<br><span class="text-[10px] font-normal">고학년용</span>
+                        </button>
+                        <button type="button" data-diff="3" class="diff-chip jelly-btn bg-pink-50 text-pink-500 py-1.5 px-2 rounded-xl text-xs sm:text-sm font-bold">
+                            🚀 신나게<br><span class="text-[10px] font-normal">빠르게</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Primary Action Buttons -->
+                <div class="flex flex-col gap-2.5 w-full max-w-sm">
+                    <!-- 1. Hosted song.mp3 One-Click Start Button -->
+                    <button id="btnStartHostedSong" class="jelly-btn bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold py-3.5 px-5 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2.5 border-2 border-white shadow-md">
+                        <span class="text-2xl">🎵</span>
+                        <div class="text-left">
+                            <div id="hostedBtnTitle">사랑하는 당신에게 (원곡 불러오는 중...)</div>
+                            <div id="hostedBtnSub" class="text-[11px] font-normal text-pink-100">같은 폴더의 song.mp3를 자동으로 찾고 있어요</div>
+                        </div>
+                    </button>
+
+                    <!-- 2. Backup File Upload Button -->
+                    <label for="mediaFileInput" class="cursor-pointer jelly-btn bg-white hover:bg-pink-50 text-pink-600 font-extrabold py-2.5 px-5 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-pink-200">
+                        <span class="text-lg">📂</span>
+                        <span>내 음원 파일 직접 올리기 (MP3 / WAV / WEBM)</span>
+                    </label>
+
+                    <!-- 3. Built-in Piano Melody Preset Backup -->
+                    <button id="btnStartPreset" class="jelly-btn bg-amber-200/90 hover:bg-amber-300 text-amber-950 font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 border border-amber-300">
+                        <span>🎹</span>
+                        <span>음원 파일 없이 피아노 연습 반주로 플레이</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Hosting Status Helper Banner -->
+                <div id="hostingStatusBanner" class="mt-3 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 max-w-sm text-[11px] text-sky-700 leading-snug">
+                    ⏳ 호스팅 폴더의 <code class="bg-white px-1 rounded border border-sky-200 font-mono">song.mp3</code> 파일을 확인하고 있어요...
+                </div>
+            </div>
+
+            <!-- 2. Pause Modal Overlay -->
+            <div id="pauseModal" class="absolute inset-0 z-40 hidden flex-col items-center justify-center p-4 sm:p-6 bg-pink-950/35 backdrop-blur-md text-center">
+                <div class="jelly-panel p-5 sm:p-7 rounded-[2rem] w-full max-w-xs border-4 border-white">
+                    <div class="text-3xl sm:text-4xl mb-1 animate-bounce">⏸️</div>
+                    <h3 class="text-2xl font-extrabold text-pink-500 mb-1">잠깐 쉬어가요!</h3>
+                    <p class="text-xs text-gray-500 mb-4">박자가 빠르거나 느리면 아래에서 조절해보세요 🌸</p>
+
+                    <!-- Quick Sync Offset Control in Pause Menu -->
+                    <div class="bg-pink-50/90 border-2 border-pink-200 rounded-2xl p-3 mb-4 text-left">
+                        <div class="flex justify-between items-center text-xs font-bold text-pink-600 mb-1">
+                            <span>🎯 박자 싱크 미세 조절</span>
+                            <span id="pauseSyncValue" class="bg-white px-2 py-0.5 rounded-full border border-pink-200">0 ms</span>
+                        </div>
+                        <input type="range" id="pauseSyncSlider" min="-200" max="200" step="10" value="0" class="w-full">
+                        <div class="flex justify-between text-[10px] text-gray-400 mt-0.5">
+                            <span>-200ms (노트 빠르게)</span>
+                            <span>+200ms (노트 느리게)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2.5">
+                        <button id="btnResume" class="jelly-btn bg-emerald-400 hover:bg-emerald-500 text-white font-extrabold py-3 px-5 rounded-2xl text-base flex items-center justify-center gap-2">
+                            <span>▶️</span> 이어서 하기
+                        </button>
+                        <button id="btnPauseRestart" class="jelly-btn bg-amber-300 hover:bg-amber-400 text-amber-950 font-extrabold py-3 px-5 rounded-2xl text-base flex items-center justify-center gap-2">
+                            <span>🔄</span> 다시 하기
+                        </button>
+                        <button id="btnPauseHome" class="jelly-btn bg-pink-100 hover:bg-pink-200 text-pink-600 font-extrabold py-3 px-5 rounded-2xl text-base flex items-center justify-center gap-2">
+                            <span>🏠</span> 처음으로
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Settings Modal Overlay -->
+            <div id="settingsModal" class="absolute inset-0 z-40 hidden flex-col items-center justify-center p-4 sm:p-6 bg-pink-950/35 backdrop-blur-md text-center">
+                <div class="jelly-panel p-5 sm:p-6 rounded-[2rem] w-full max-w-xs border-4 border-white">
+                    <h3 class="text-xl font-extrabold text-pink-500 mb-3">⚙️ 게임 설정</h3>
+                    
+                    <div class="space-y-3 text-left mb-5">
+                        <!-- Note Speed -->
+                        <div class="bg-pink-50/80 p-3 rounded-2xl border border-pink-200">
+                            <div class="flex justify-between text-xs font-bold text-pink-600 mb-1">
+                                <span>🚀 노트 내려오는 속도 (배속)</span>
+                                <span id="speedValueDisplay" class="bg-white px-2 py-0.5 rounded-full">1.4x</span>
+                            </div>
+                            <input type="range" id="speedSlider" min="1.0" max="3.0" step="0.2" value="1.4" class="w-full">
+                        </div>
+
+                        <!-- Sync Offset -->
+                        <div class="bg-sky-50/80 p-3 rounded-2xl border border-sky-200">
+                            <div class="flex justify-between text-xs font-bold text-sky-600 mb-1">
+                                <span>🎯 박자 싱크 미세 조절</span>
+                                <span id="settingsSyncValue" class="bg-white px-2 py-0.5 rounded-full">0 ms</span>
+                            </div>
+                            <input type="range" id="settingsSyncSlider" min="-200" max="200" step="10" value="0" class="w-full">
+                        </div>
+
+                        <!-- Hit Sound Toggle -->
+                        <label class="flex items-center justify-between bg-amber-50/80 p-3 rounded-2xl border border-amber-200 cursor-pointer">
+                            <span class="text-xs font-bold text-amber-800">🔔 터치 뿅뿅 효과음 켜기</span>
+                            <input type="checkbox" id="toggleSfx" checked class="w-5 h-5 accent-pink-500 rounded">
+                        </label>
+                    </div>
+
+                    <button id="btnCloseSettings" class="w-full jelly-btn bg-pink-400 hover:bg-pink-500 text-white font-extrabold py-2.5 px-5 rounded-2xl text-sm">
+                        완료! 돌아가기 💖
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. Result / Completion Modal -->
+            <div id="resultModal" class="absolute inset-0 z-40 hidden flex-col items-center justify-center p-5 bg-pink-50/95 backdrop-blur-md text-center overflow-y-auto">
+                <!-- Stamp Badge -->
+                <div id="stampBadge" class="w-24 h-24 bg-rose-100 rounded-full border-4 border-rose-400 flex flex-col items-center justify-center text-rose-500 font-extrabold rotate-[-10deg] mb-2 shadow-md">
+                    <span class="text-2xl">💮</span>
+                    <span class="text-sm leading-tight">참 잘했어요!</span>
+                </div>
+
+                <h2 id="resultTitle" class="text-2xl sm:text-4xl font-black mb-1 text-pink-500">
+                    와아! 끝까지 완주했어요! 🎉
+                </h2>
+                <p id="resultSubTitle" class="text-xs sm:text-sm text-gray-500 mb-3">
+                    하나님과 가족을 사랑하는 멋진 친구예요 💖
+                </p>
+
+                <div class="jelly-panel p-4 sm:p-5 rounded-3xl w-full max-w-xs mb-4 border-2 border-pink-200">
+                    <div class="text-xs text-gray-400">최종 점수</div>
+                    <div id="resultScore" class="text-3xl sm:text-4xl font-black text-pink-500 mb-3">000000</div>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                        <div class="bg-pink-100/80 p-2 rounded-xl text-pink-600">최고야! ✨: <span id="countPerfect">0</span></div>
+                        <div class="bg-amber-100/80 p-2 rounded-xl text-amber-600">잘했어요! 💖: <span id="countGreat">0</span></div>
+                        <div class="bg-sky-100/80 p-2 rounded-xl text-sky-600">좋아요! ⭐️: <span id="countGood">0</span></div>
+                        <div class="bg-gray-100 p-2 rounded-xl text-gray-500">힘내요! 🥺: <span id="countMiss">0</span></div>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t border-pink-100 text-xs text-pink-500 font-bold">
+                        최대 연속 성공: <span id="resultMaxCombo" class="text-amber-500 text-sm">0</span> 콤보!
+                    </div>
+                </div>
+
+                <!-- Result Screen Buttons -->
+                <div class="flex gap-3 w-full max-w-xs">
+                    <button id="btnResultRestart" class="flex-1 jelly-btn bg-amber-300 hover:bg-amber-400 text-amber-950 font-extrabold py-3 px-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-1.5">
+                        <span>🔄</span> 다시 하기
+                    </button>
+                    <button id="btnResultHome" class="flex-1 jelly-btn bg-pink-400 hover:bg-pink-500 text-white font-extrabold py-3 px-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-1.5">
+                        <span>🏠</span> 처음으로
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Character Touch / Key Pad (Extra Large for Mobile & Tablet Multi-Touch) -->
+        <div class="w-full mt-2 sm:mt-2.5 grid grid-cols-4 gap-2 sm:gap-3 max-w-lg z-20 px-0.5">
+            <!-- Q: Pink Chiikawa -->
+            <button id="keyBtn-0" data-lane="0" class="lane-btn-0 jelly-btn bg-white/95 rounded-2xl sm:rounded-3xl h-28 sm:h-32 py-2 flex flex-col items-center justify-between border-b-[6px] border-pink-300 relative overflow-hidden">
+                <div class="flex items-center gap-1 text-[11px] sm:text-xs text-pink-500 font-extrabold bg-pink-50 px-2.5 py-0.5 rounded-full">
+                    <span>🎀</span><span>먼작귀</span>
+                </div>
+                <span class="text-xl sm:text-2xl font-black text-gray-700 leading-none tracking-tight">( •̀ ᴗ •́ )</span>
+                <span class="w-11 sm:w-12 py-0.5 bg-pink-400 text-white rounded-full font-black text-sm sm:text-base shadow-sm">Q</span>
+            </button>
+
+            <!-- W: Yellow Usagi -->
+            <button id="keyBtn-1" data-lane="1" class="lane-btn-1 jelly-btn bg-white/95 rounded-2xl sm:rounded-3xl h-28 sm:h-32 py-2 flex flex-col items-center justify-between border-b-[6px] border-amber-300 relative overflow-hidden">
+                <div class="flex items-center gap-1 text-[11px] sm:text-xs text-amber-600 font-extrabold bg-amber-50 px-2.5 py-0.5 rounded-full">
+                    <span>🐰</span><span>토끼</span>
+                </div>
+                <span class="text-xl sm:text-2xl font-black text-gray-700 leading-none tracking-tight">( • ㅂ • )</span>
+                <span class="w-11 sm:w-12 py-0.5 bg-amber-400 text-amber-950 rounded-full font-black text-sm sm:text-base shadow-sm">W</span>
+            </button>
+
+            <!-- E: Blue Hachiware -->
+            <button id="keyBtn-2" data-lane="2" class="lane-btn-2 jelly-btn bg-white/95 rounded-2xl sm:rounded-3xl h-28 sm:h-32 py-2 flex flex-col items-center justify-between border-b-[6px] border-sky-300 relative overflow-hidden">
+                <div class="flex items-center gap-1 text-[11px] sm:text-xs text-sky-600 font-extrabold bg-sky-50 px-2.5 py-0.5 rounded-full">
+                    <span>🐱</span><span>고양이</span>
+                </div>
+                <span class="text-xl sm:text-2xl font-black text-gray-700 leading-none tracking-tight">( • ω • )</span>
+                <span class="w-11 sm:w-12 py-0.5 bg-sky-400 text-white rounded-full font-black text-sm sm:text-base shadow-sm">E</span>
+            </button>
+
+            <!-- R: Mint Momonga -->
+            <button id="keyBtn-3" data-lane="3" class="lane-btn-3 jelly-btn bg-white/95 rounded-2xl sm:rounded-3xl h-28 sm:h-32 py-2 flex flex-col items-center justify-between border-b-[6px] border-emerald-300 relative overflow-hidden">
+                <div class="flex items-center gap-1 text-[11px] sm:text-xs text-emerald-600 font-extrabold bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                    <span>🐿️</span><span>다람쥐</span>
+                </div>
+                <span class="text-xl sm:text-2xl font-black text-gray-700 leading-none tracking-tight">( ◕ ᴗ ◕ )</span>
+                <span class="w-11 sm:w-12 py-0.5 bg-emerald-400 text-white rounded-full font-black text-sm sm:text-base shadow-sm">R</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Toast Message Box (Replaces alert) -->
+    <div id="toastMessage" class="fixed bottom-36 left-1/2 -translate-x-1/2 z-50 bg-gray-800/90 text-white px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+        알림 메시지
+    </div>
+
+    <script>
+        /**
+         * =====================================================================
+         * [호스팅 설정 영역]
+         * 웹 호스팅(GitHub Pages, 개인 서버 등)에 index.html과 같은 폴더에
+         * 올려둘 원곡 파일 경로와 곡 제목을 여기서 손쉽게 변경할 수 있습니다.
+         * =====================================================================
+         */
+        const DEFAULT_SONG_FILE = './song.mp3';
+        const DEFAULT_SONG_TITLE = '사랑하는 당신에게 (원곡)';
+
+        // '사랑하는 당신에게' 구간별 가사 자막 (초 단위)
+        const SONG_LYRICS = [
+            { time: 0.0,  text: '🎹 따뜻한 피아노 전주가 흘러나와요 ~ ♪' },
+            { time: 14.5, text: '사랑하는 당신에게 꼭 하고 싶은 이야기가 있어요' },
+            { time: 25.5, text: '주님이 얼마나 당신을 사랑하시는지' },
+            { time: 33.0, text: '또 얼마나 기다리시는지' },
+            { time: 40.5, text: '그를 만나고 하나 되어 살아가는 삶이 소중합니다' },
+            { time: 54.5, text: '이 행복한 날이 이 축복된 날이' },
+            { time: 62.0, text: '어서 당신에게 오기를 기도합니다' },
+            { time: 69.0, text: '사랑해요 사랑해요 사랑해요 나의 가족 💖' },
+            { time: 83.0, text: '🎹 간주 중이에요 ~ 함께 박수를 쳐볼까요? 👏' },
+            { time: 94.5, text: '사랑하는 당신에게 꼭 하고 싶은 이야기가 있어요' },
+            { time: 105.5, text: '주님이 얼마나 당신을 사랑하시는지' },
+            { time: 113.0, text: '또 얼마나 기다리시는지' },
+            { time: 120.5, text: '그를 만나고 하나 되어 살아가는 삶이 소중합니다' },
+            { time: 134.5, text: '이 행복한 날이 이 축복된 날이' },
+            { time: 142.0, text: '어서 당신에게 오기를 기도합니다' },
+            { time: 149.0, text: '사랑해요 사랑해요 사랑해요 나의 가족 💖' },
+            { time: 163.0, text: '✨ 다 함께 신나게 불러요! 이 행복한 날이 ~' },
+            { time: 171.0, text: '이 축복된 날이 어서 당신에게 오기를 기도합니다' },
+            { time: 178.0, text: '사랑해요 사랑해요 사랑해요 나의 가족 💕' },
+            { time: 192.0, text: '사랑해요 나의 가족 ~ 🌸' },
+            { time: 202.0, text: '🎹 아름다운 피아노 엔딩 연주 ~ 수고했어요! ✨' }
+        ];
+
+        // Lane Visual Themes (Chiikawa Pastel Palette)
+        const LANE_THEMES = [
+            { key: 'Q', name: '먼작귀', color: '#ff8fab', light: '#ffe5ec', dark: '#d6456b', face: '•̀ ᴗ •́' },
+            { key: 'W', name: '토끼',   color: '#ffca3a', light: '#fff6cc', dark: '#c98a00', face: '• ㅂ •' },
+            { key: 'E', name: '고양이', color: '#5cc8ff', light: '#e0f4ff', dark: '#1e7cb3', face: '• ω •' },
+            { key: 'R', name: '다람쥐', color: '#52d681', light: '#dcfce7', dark: '#1e8e4b', face: '◕ ᴗ ◕' }
+        ];
+
+        // Global Game State
+        const state = {
+            mode: 'idle',            // 'idle' | 'countdown' | 'playing' | 'paused' | 'ended'
+            sourceType: 'hosted',    // 'hosted' | 'uploaded' | 'preset'
+            songTitle: DEFAULT_SONG_TITLE,
+            hostedBuffer: null,      // Pre-decoded buffer from ./song.mp3
+            activeBuffer: null,      // Currently selected AudioBuffer
+            duration: 218.0,         // Total song duration in seconds
+            difficulty: 1,           // 1: Easy, 2: Normal, 3: Hard
+            noteSpeed: 1.4,          // Visual fall speed multiplier
+            syncOffsetMs: 0,         // Audio-visual sync adjustment (-200ms to +200ms)
+            sfxEnabled: true,
+            
+            // Playback Timing (Hardware AudioContext Clock)
+            audioCtx: null,
+            bufferSource: null,
+            startCtxTime: 0,         // AudioContext.currentTime when song started
+            pausedAtSongTime: 0,     // Song position (sec) when paused
+            currentSongTime: 0,
+            presetTimerId: null,
+
+            // Notes & Particles
+            notes: [],               // { id, lane, time, hit, missed }
+            particles: [],
+            laneFlashes: [0, 0, 0, 0],
+            lanePressed: [false, false, false, false],
+
+            // Scoring & Stats
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            hp: 100,
+            stats: { perfect: 0, great: 0, good: 0, miss: 0 }
+        };
+
+        // DOM Elements
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const canvas = document.getElementById('rhythmCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const startOverlay = document.getElementById('startOverlay');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownBadge = document.getElementById('countdownBadge');
+        const countdownSubText = document.getElementById('countdownSubText');
+        const pauseModal = document.getElementById('pauseModal');
+        const settingsModal = document.getElementById('settingsModal');
+        const resultModal = document.getElementById('resultModal');
+        const hudOverlay = document.getElementById('hudOverlay');
+
+        const btnStartHostedSong = document.getElementById('btnStartHostedSong');
+        const hostedBtnTitle = document.getElementById('hostedBtnTitle');
+        const hostedBtnSub = document.getElementById('hostedBtnSub');
+        const hostingStatusBanner = document.getElementById('hostingStatusBanner');
+        const currentSongBadge = document.getElementById('currentSongBadge');
+        const btnPause = document.getElementById('btnPause');
+
+        // Toast Helper (Never uses alert())
+        let toastTimeout = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toastMessage');
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2600);
+        }
+
+        // Initialize or Resume Web AudioContext
+        function ensureAudioContext() {
+            if (!state.audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                state.audioCtx = new AudioCtx();
+            }
+            if (state.audioCtx.state === 'suspended') {
+                state.audioCtx.resume();
+            }
+            return state.audioCtx;
+        }
+
+        // Cute Pop Hit Sound Effect (Synthesized via Web Audio API)
+        function playHitSfx(lane, quality) {
+            if (!state.sfxEnabled) return;
+            try {
+                const ctxAudio = ensureAudioContext();
+                const now = ctxAudio.currentTime;
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+
+                // Pentatonic cute frequencies per lane
+                const freqs = [523.25, 587.33, 659.25, 783.99]; // C5, D5, E5, G5
+                osc.type = quality === 'perfect' ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freqs[lane], now);
+                osc.frequency.exponentialRampToValueAtTime(freqs[lane] * 1.35, now + 0.08);
+
+                gain.gain.setValueAtTime(0.14, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+                osc.connect(gain);
+                gain.connect(ctxAudio.destination);
+                osc.start(now);
+                osc.stop(now + 0.095);
+            } catch (e) {
+                // Ignore audio unlock error before user gesture
+            }
+        }
+
+        /**
+         * =====================================================================
+         * 1. 호스팅 환경 자동 로드: fetch('./song.mp3') 및 디코딩
+         * =====================================================================
+         */
+        async function preloadHostedSong() {
+            try {
+                const response = await fetch(DEFAULT_SONG_FILE);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const audioCtx = ensureAudioContext();
+                const decodedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+                state.hostedBuffer = decodedBuffer;
+                state.activeBuffer = decodedBuffer;
+                state.sourceType = 'hosted';
+                state.songTitle = DEFAULT_SONG_TITLE;
+                state.duration = decodedBuffer.duration;
+
+                // Update UI to Ready State
+                hostedBtnTitle.textContent = '사랑하는 당신에게 (원곡 바로 시작!)';
+                hostedBtnSub.textContent = `원곡 준비 완료! 터치하면 바로 시작해요 (${formatTime(decodedBuffer.duration)})`;
+                currentSongBadge.textContent = `🎵 준비 완료: ${DEFAULT_SONG_TITLE}`;
+                hostingStatusBanner.className = 'mt-3 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 max-w-sm text-[11px] text-emerald-700 leading-snug font-bold';
+                hostingStatusBanner.innerHTML = '✅ 원곡(<code class="bg-white px-1 rounded border border-emerald-200">song.mp3</code>) 로드 완료! 위 분홍 버튼을 누르면 바로 시작돼요!';
+            } catch (err) {
+                // Fallback when opened via file:// or before song.mp3 is uploaded to hosting folder
+                state.hostedBuffer = null;
+                hostedBtnTitle.textContent = '사랑하는 당신에게 (피아노 연습곡 시작)';
+                hostedBtnSub.textContent = '같은 폴더에 song.mp3가 없어 연습 반주로 연결돼요';
+                currentSongBadge.textContent = '🎹 연습 반주 대기 중 (또는 파일 업로드)';
+                hostingStatusBanner.className = 'mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 max-w-sm text-[11px] text-amber-800 leading-snug';
+                hostingStatusBanner.innerHTML = '💡 호스팅 폴더에 <code class="bg-white px-1 rounded border border-amber-300 font-mono">song.mp3</code> 파일을 함께 넣으면 업로드 없이 자동 로드돼요!';
+            }
+        }
+
+        /**
+         * =====================================================================
+         * 2. 오디오 버퍼 Onset(에너지 급상승) 정밀 박자 분석 & 자동 채보 생성
+         * =====================================================================
+         */
+        function generateNotesFromAudioBuffer(audioBuffer, difficulty) {
+            const sampleRate = audioBuffer.sampleRate;
+            const channelData = audioBuffer.getChannelData(0);
+            const totalSamples = channelData.length;
+            const duration = audioBuffer.duration;
+
+            // 1) 무음 구간 자동 감지 (첫 소리가 시작되는 지점 찾기)
+            let firstSoundSec = 0;
+            const silenceThreshold = 0.015;
+            for (let i = 0; i < totalSamples; i += Math.floor(sampleRate * 0.01)) {
+                if (Math.abs(channelData[i]) > silenceThreshold) {
+                    firstSoundSec = Math.max(0, (i / sampleRate) - 0.05);
+                    break;
+                }
+            }
+
+            // 2) 프레임 단위 RMS 에너지 계산 (20ms 윈도우)
+            const hopSize = Math.floor(sampleRate * 0.02); // 0.02s step
+            const energies = [];
+            for (let i = 0; i < totalSamples - hopSize; i += hopSize) {
+                let sum = 0;
+                for (let j = 0; j < hopSize; j += 4) {
+                    const v = channelData[i + j];
+                    sum += v * v;
+                }
+                energies.push(Math.sqrt(sum / (hopSize / 4)));
+            }
+
+            // 3) Onset(에너지가 주변 평균보다 뚜렷하게 튀어오르는 지점) 검출
+            const notes = [];
+            // 난이도별 최소 노트 간격 (초) 및 민감도 설정
+            const minInterval = difficulty === 1 ? 0.68 : (difficulty === 2 ? 0.42 : 0.27);
+            const thresholdMult = difficulty === 1 ? 1.48 : (difficulty === 2 ? 1.32 : 1.18);
+
+            let lastNoteTime = Math.max(1.2, firstSoundSec);
+            let lastLane = -1;
+            const historyWindow = 18; // ~0.36초 이동 평균
+
+            for (let idx = historyWindow; idx < energies.length - 2; idx++) {
+                const timeSec = idx * 0.02;
+                if (timeSec < lastNoteTime + minInterval) continue;
+                if (timeSec > duration - 1.5) break;
+
+                // 주변 구간 평균 에너지
+                let localSum = 0;
+                for (let k = idx - historyWindow; k < idx; k++) {
+                    localSum += energies[k];
+                }
+                const localAvg = localSum / historyWindow;
+                const currentE = energies[idx];
+                const prevE = energies[idx - 1];
+
+                // 에너지 피크 & 급상승(Onset) 조건
+                if (currentE > 0.022 && currentE > localAvg * thresholdMult && currentE >= prevE && currentE >= energies[idx + 1]) {
+                    // 음의 높이/에너지 변화에 따라 자연스럽게 레인 배정 (같은 레인 연속 방지)
+                    let lane;
+                    const energyRatio = Math.min(3.99, (currentE / (localAvg + 0.001)) * 1.4);
+                    lane = Math.floor(energyRatio) % 4;
+                    if (lane === lastLane) {
+                        lane = (lane + 1 + Math.floor(Math.random() * 2)) % 4;
+                    }
+
+                    notes.push({
+                        id: notes.length,
+                        lane: lane,
+                        time: Number(timeSec.toFixed(3)),
+                        hit: false,
+                        missed: false
+                    });
+
+                    // Hard 난이도일 때 강한 박자에서 가끔 동시치기(2키) 추가
+                    if (difficulty === 3 && currentE > localAvg * 2.1 && Math.random() < 0.25) {
+                        const secondLane = (lane + 2) % 4;
+                        notes.push({
+                            id: notes.length,
+                            lane: secondLane,
+                            time: Number(timeSec.toFixed(3)),
+                            hit: false,
+                            missed: false
+                        });
+                    }
+
+                    lastNoteTime = timeSec;
+                    lastLane = lane;
+                }
+            }
+
+            // 만약 아주 조용한 곡이라 노트가 너무 적게 생성된 경우 기본 박자 보완
+            if (notes.length < 20) {
+                const step = difficulty === 1 ? 0.9 : (difficulty === 2 ? 0.6 : 0.4);
+                let l = 0;
+                for (let t = Math.max(1.5, firstSoundSec); t < duration - 2.0; t += step) {
+                    notes.push({
+                        id: notes.length,
+                        lane: l % 4,
+                        time: Number(t.toFixed(3)),
+                        hit: false,
+                        missed: false
+                    });
+                    l += (Math.random() > 0.3 ? 1 : 2);
+                }
+            }
+
+            return notes;
+        }
+
+        // 내장 피아노 연습곡 채보 생성기 ('사랑하는 당신에게' 템포 맞춤)
+        function generatePresetNotes(difficulty) {
+            const notes = [];
+            const totalDuration = 218.0;
+            const interval = difficulty === 1 ? 0.78 : (difficulty === 2 ? 0.52 : 0.36);
+            let lane = 0;
+            for (let t = 2.0; t < totalDuration - 2.0; t += interval) {
+                // 간주 구간은 조금 여유롭게
+                if (t > 83 && t < 93 && difficulty === 1) {
+                    t += interval * 0.5;
+                }
+                notes.push({
+                    id: notes.length,
+                    lane: lane % 4,
+                    time: Number(t.toFixed(3)),
+                    hit: false,
+                    missed: false
+                });
+                lane = (lane + (Math.random() > 0.35 ? 1 : 3)) % 4;
+            }
+            return notes;
+        }
+
+        // 내장 피아노 반주 합성기 (송 파일이 없을 때 백업용)
+        function startPresetPianoBacking(offsetSec = 0) {
+            stopAudioPlayback();
+            const ctxAudio = ensureAudioContext();
+            const melodyNotes = [
+                293.66, 329.63, 369.99, 392.00, 440.00, 392.00, 369.99, 329.63,
+                293.66, 246.94, 293.66, 369.99, 329.63, 293.66, 293.66, 0
+            ];
+            let stepIdx = Math.floor(offsetSec / 0.75);
+
+            function playNextTone() {
+                if (state.mode !== 'playing' || state.sourceType !== 'preset') return;
+                const freq = melodyNotes[stepIdx % melodyNotes.length];
+                if (freq > 0) {
+                    const now = ctxAudio.currentTime;
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+                    osc.connect(gain);
+                    gain.connect(ctxAudio.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.68);
+                }
+                stepIdx++;
+                state.presetTimerId = setTimeout(playNextTone, 750);
+            }
+            playNextTone();
+        }
+
+        /**
+         * =====================================================================
+         * 3. 오디오 재생 제어 (AudioBufferSourceNode 정밀 동기화)
+         * =====================================================================
+         */
+        function stopAudioPlayback() {
+            if (state.bufferSource) {
+                try {
+                    state.bufferSource.onended = null;
+                    state.bufferSource.stop();
+                    state.bufferSource.disconnect();
+                } catch (e) {}
+                state.bufferSource = null;
+            }
+            if (state.presetTimerId) {
+                clearTimeout(state.presetTimerId);
+                state.presetTimerId = null;
+            }
+        }
+
+        function startAudioFromPosition(songOffsetSec) {
+            stopAudioPlayback();
+            const ctxAudio = ensureAudioContext();
+
+            if ((state.sourceType === 'hosted' || state.sourceType === 'uploaded') && state.activeBuffer) {
+                const source = ctxAudio.createBufferSource();
+                source.buffer = state.activeBuffer;
+                source.connect(ctxAudio.destination);
+
+                state.startCtxTime = ctxAudio.currentTime - songOffsetSec;
+                source.start(0, Math.max(0, songOffsetSec));
+                state.bufferSource = source;
+
+                source.onended = () => {
+                    if (state.mode === 'playing' && getSongTime() >= state.duration - 0.5) {
+                        finishGame(true);
+                    }
+                };
+            } else {
+                state.startCtxTime = ctxAudio.currentTime - songOffsetSec;
+                startPresetPianoBacking(songOffsetSec);
+            }
+        }
+
+        function getSongTime() {
+            if (state.mode === 'playing' && state.audioCtx) {
+                return (state.audioCtx.currentTime - state.startCtxTime) + (state.syncOffsetMs / 1000);
+            }
+            return state.pausedAtSongTime;
+        }
+
+        /**
+         * =====================================================================
+         * 4. 게임 시작 (3, 2, 1 카운트다운) / 일시정지 / 재시작 / 홈 이동
+         * =====================================================================
+         */
+        function prepareAndStartGame(sourceType, customBuffer = null, customTitle = null) {
+            ensureAudioContext();
+            stopAudioPlayback();
+
+            state.sourceType = sourceType;
+            if (sourceType === 'hosted' && state.hostedBuffer) {
+                state.activeBuffer = state.hostedBuffer;
+                state.songTitle = DEFAULT_SONG_TITLE;
+                state.duration = state.hostedBuffer.duration;
+                state.notes = generateNotesFromAudioBuffer(state.activeBuffer, state.difficulty);
+            } else if (sourceType === 'uploaded' && customBuffer) {
+                state.activeBuffer = customBuffer;
+                state.songTitle = customTitle || '업로드된 곡';
+                state.duration = customBuffer.duration;
+                state.notes = generateNotesFromAudioBuffer(state.activeBuffer, state.difficulty);
+            } else {
+                state.sourceType = 'preset';
+                state.activeBuffer = null;
+                state.songTitle = '사랑하는 당신에게 (피아노 연습곡)';
+                state.duration = 218.0;
+                state.notes = generatePresetNotes(state.difficulty);
+            }
+
+            currentSongBadge.textContent = `🎵 ${state.songTitle}`;
+            document.getElementById('totalTimeDisplay').textContent = formatTime(state.duration);
+
+            resetGameMetrics();
+            startOverlay.classList.add('hidden');
+            pauseModal.classList.add('hidden');
+            resultModal.classList.add('hidden');
+            hudOverlay.style.opacity = '1';
+            btnPause.classList.remove('hidden');
+
+            runCountdownAndPlay(0);
+        }
+
+        function resetGameMetrics() {
+            state.score = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.hp = 100;
+            state.stats = { perfect: 0, great: 0, good: 0, miss: 0 };
+            state.particles = [];
+            state.pausedAtSongTime = 0;
+            state.currentSongTime = 0;
+            state.notes.forEach(n => {
+                n.hit = false;
+                n.missed = false;
+            });
+            updateHudUI();
+        }
+
+        function runCountdownAndPlay(resumeFromSec = 0) {
+            state.mode = 'countdown';
+            state.pausedAtSongTime = resumeFromSec;
+            countdownOverlay.classList.remove('hidden');
+            countdownOverlay.classList.add('flex');
+
+            let count = 3;
+            countdownBadge.textContent = count;
+            countdownSubText.textContent = `${state.songTitle} 준비하세요! 🎵`;
+
+            const timer = setInterval(() => {
+                if (state.mode !== 'countdown') {
+                    clearInterval(timer);
+                    return;
+                }
+                count--;
+                if (count > 0) {
+                    countdownBadge.textContent = count;
+                } else if (count === 0) {
+                    countdownBadge.textContent = '시작!';
+                } else {
+                    clearInterval(timer);
+                    countdownOverlay.classList.add('hidden');
+                    countdownOverlay.classList.remove('flex');
+                    state.mode = 'playing';
+                    startAudioFromPosition(resumeFromSec);
+                }
+            }, 650);
+        }
+
+        function pauseGame() {
+            if (state.mode !== 'playing') return;
+            state.pausedAtSongTime = Math.max(0, getSongTime() - (state.syncOffsetMs / 1000));
+            state.mode = 'paused';
+            stopAudioPlayback();
+
+            pauseModal.classList.remove('hidden');
+            pauseModal.classList.add('flex');
+        }
+
+        function resumeGame() {
+            if (state.mode !== 'paused') return;
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+            runCountdownAndPlay(state.pausedAtSongTime);
+        }
+
+        function restartCurrentGame() {
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+            resultModal.classList.add('hidden');
+            resultModal.classList.remove('flex');
+
+            // Re-generate notes with current difficulty
+            if ((state.sourceType === 'hosted' || state.sourceType === 'uploaded') && state.activeBuffer) {
+                state.notes = generateNotesFromAudioBuffer(state.activeBuffer, state.difficulty);
+            } else {
+                state.notes = generatePresetNotes(state.difficulty);
+            }
+
+            resetGameMetrics();
+            hudOverlay.style.opacity = '1';
+            btnPause.classList.remove('hidden');
+            runCountdownAndPlay(0);
+        }
+
+        function goHome() {
+            state.mode = 'idle';
+            stopAudioPlayback();
+            countdownOverlay.classList.add('hidden');
+            countdownOverlay.classList.remove('flex');
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+            resultModal.classList.add('hidden');
+            resultModal.classList.remove('flex');
+            btnPause.classList.add('hidden');
+            hudOverlay.style.opacity = '0';
+
+            startOverlay.classList.remove('hidden');
+        }
+
+        function finishGame(completed = true) {
+            state.mode = 'ended';
+            stopAudioPlayback();
+            btnPause.classList.add('hidden');
+
+            document.getElementById('resultScore').textContent = String(state.score).padStart(7, '0');
+            document.getElementById('countPerfect').textContent = state.stats.perfect;
+            document.getElementById('countGreat').textContent = state.stats.great;
+            document.getElementById('countGood').textContent = state.stats.good;
+            document.getElementById('countMiss').textContent = state.stats.miss;
+            document.getElementById('resultMaxCombo').textContent = state.maxCombo;
+
+            if (completed) {
+                document.getElementById('resultTitle').textContent = '와아! 끝까지 완주했어요! 🎉';
+                document.getElementById('resultSubTitle').textContent = '하나님과 가족을 사랑하는 멋진 친구예요 💖';
+            } else {
+                document.getElementById('resultTitle').textContent = '아쉬워요! 다시 도전해볼까요? 💪';
+                document.getElementById('resultSubTitle').textContent = '조금만 더 힘내면 끝까지 완주할 수 있어요!';
+            }
+
+            resultModal.classList.remove('hidden');
+            resultModal.classList.add('flex');
+        }
+
+        /**
+         * =====================================================================
+         * 5. 판정 시스템 & 파티클 이펙트
+         * =====================================================================
+         */
+        let judgmentAnimTimeout = null;
+        function triggerJudgmentPopup(text, colorClass) {
+            const el = document.getElementById('judgmentDisplay');
+            el.textContent = text;
+            el.className = `absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center transform scale-110 transition-transform duration-100 font-gaegu text-4xl sm:text-6xl font-bold tracking-wider drop-shadow-[0_3px_0_rgba(255,255,255,1)] ${colorClass}`;
+            
+            clearTimeout(judgmentAnimTimeout);
+            judgmentAnimTimeout = setTimeout(() => {
+                el.style.transform = 'translate(-50%, -50%) scale(0)';
+            }, 420);
+        }
+
+        function spawnHitParticles(lane, color) {
+            const laneWidth = canvas.width / 4;
+            const centerX = lane * laneWidth + laneWidth / 2;
+            const hitY = canvas.height - 54;
+            const shapes = ['❤️', '⭐', '✨', '🌸'];
+
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
+                const speed = 2.5 + Math.random() * 4.5;
+                state.particles.push({
+                    x: centerX,
+                    y: hitY,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2.5,
+                    alpha: 1,
+                    size: 16 + Math.random() * 10,
+                    emoji: shapes[i % shapes.length],
+                    color: color
+                });
+            }
+        }
+
+        function handleLanePress(lane) {
+            state.lanePressed[lane] = true;
+            state.laneFlashes[lane] = 1.0;
+            const btn = document.getElementById(`keyBtn-${lane}`);
+            if (btn) btn.classList.add('active');
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(12); } catch (e) {}
+            }
+
+            if (state.mode !== 'playing') {
+                playHitSfx(lane, 'perfect');
+                return;
+            }
+
+            const now = getSongTime();
+            // 아동부 친화적 넉넉한 판정 윈도우 (초)
+            const winPerfect = 0.11;
+            const winGreat   = 0.20;
+            const winGood    = 0.30;
+
+            let closestNote = null;
+            let minDiff = Infinity;
+
+            for (let i = 0; i < state.notes.length; i++) {
+                const n = state.notes[i];
+                if (n.hit || n.missed || n.lane !== lane) continue;
+                const diff = Math.abs(n.time - now);
+                if (diff < minDiff && diff <= winGood) {
+                    minDiff = diff;
+                    closestNote = n;
+                }
+            }
+
+            if (closestNote) {
+                closestNote.hit = true;
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+                state.hp = Math.min(100, state.hp + 2.5);
+
+                if (minDiff <= winPerfect) {
+                    state.stats.perfect++;
+                    state.score += 1000 + state.combo * 15;
+                    triggerJudgmentPopup('우와! 최고야! ✨', 'text-pink-500');
+                    playHitSfx(lane, 'perfect');
+                } else if (minDiff <= winGreat) {
+                    state.stats.great++;
+                    state.score += 700 + state.combo * 10;
+                    triggerJudgmentPopup('참 잘했어요! 💖', 'text-amber-500');
+                    playHitSfx(lane, 'great');
+                } else {
+                    state.stats.good++;
+                    state.score += 400 + state.combo * 5;
+                    triggerJudgmentPopup('좋아요! ⭐️', 'text-sky-500');
+                    playHitSfx(lane, 'good');
+                }
+
+                spawnHitParticles(lane, LANE_THEMES[lane].color);
+                updateHudUI();
+            } else {
+                playHitSfx(lane, 'good');
+            }
+        }
+
+        function handleLaneRelease(lane) {
+            state.lanePressed[lane] = false;
+            const btn = document.getElementById(`keyBtn-${lane}`);
+            if (btn) btn.classList.remove('active');
+        }
+
+        function updateHudUI() {
+            document.getElementById('scoreDisplay').textContent = String(state.score).padStart(7, '0');
+            document.getElementById('comboDisplay').textContent = state.combo;
+            const hpBar = document.getElementById('hpBar');
+            hpBar.style.width = `${Math.max(0, state.hp)}%`;
+        }
+
+        function formatTime(sec) {
+            const s = Math.max(0, Math.floor(sec));
+            const mins = Math.floor(s / 60);
+            const secs = s % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        /**
+         * =====================================================================
+         * 6. 반응형 캔버스 렌더링 루프 (치이카와 파스텔 젤리 스타일)
+         * =====================================================================
+         */
+        function resizeCanvases() {
+            const container = document.getElementById('gameContainer');
+            if (!container) return;
+            const rect = container.getBoundingClientRect();
+
+            bgCanvas.width = rect.width;
+            bgCanvas.height = rect.height;
+
+            // Rhythm highway width adapts to screen width (max 480px)
+            canvas.width = Math.min(rect.width, 480);
+            canvas.height = rect.height;
+        }
+
+        // Background Floating Pastel Bubbles
+        const bgBubbles = Array.from({ length: 16 }, () => ({
+            x: Math.random(),
+            y: Math.random(),
+            r: 12 + Math.random() * 26,
+            speed: 0.0004 + Math.random() * 0.0008,
+            color: ['#ffe5ec', '#fff3b0', '#e0f4ff', '#dcfce7'][Math.floor(Math.random() * 4)]
+        }));
+
+        function renderLoop() {
+            // 1) Draw Soft Background Bubbles
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            bgBubbles.forEach(b => {
+                b.y -= b.speed;
+                if (b.y < -0.1) b.y = 1.1;
+                bgCtx.beginPath();
+                bgCtx.arc(b.x * bgCanvas.width, b.y * bgCanvas.height, b.r, 0, Math.PI * 2);
+                bgCtx.fillStyle = b.color;
+                bgCtx.fill();
+            });
+
+            // 2) Draw Rhythm Highway
+            const w = canvas.width;
+            const h = canvas.height;
+            const laneW = w / 4;
+            const hitLineY = h - 54;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Lane Columns & Touch Highlight Beams
+            for (let i = 0; i < 4; i++) {
+                const theme = LANE_THEMES[i];
+                ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.55)' : 'rgba(255, 248, 251, 0.45)';
+                ctx.fillRect(i * laneW, 0, laneW, h);
+
+                if (state.laneFlashes[i] > 0.01) {
+                    const grad = ctx.createLinearGradient(0, hitLineY, 0, hitLineY - 220);
+                    grad.addColorStop(0, theme.light);
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(i * laneW + 2, hitLineY - 220, laneW - 4, 220);
+                    state.laneFlashes[i] *= 0.85;
+                }
+
+                // Soft Divider Line
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(244, 162, 184, 0.35)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(i * laneW, 0);
+                    ctx.lineTo(i * laneW, h);
+                    ctx.stroke();
+                }
+            }
+
+            // Judgment Target Line & Cute Character Receptors
+            ctx.fillStyle = 'rgba(255, 143, 171, 0.25)';
+            ctx.fillRect(0, hitLineY - 6, w, 12);
+
+            for (let i = 0; i < 4; i++) {
+                const theme = LANE_THEMES[i];
+                const cx = i * laneW + laneW / 2;
+                const radius = Math.min(laneW * 0.36, 32);
+
+                ctx.beginPath();
+                ctx.arc(cx, hitLineY, state.lanePressed[i] ? radius * 0.9 : radius, 0, Math.PI * 2);
+                ctx.fillStyle = state.lanePressed[i] ? theme.color : '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = theme.color;
+                ctx.stroke();
+
+                ctx.fillStyle = state.lanePressed[i] ? '#ffffff' : theme.dark;
+                ctx.font = 'bold 16px "Jua", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(theme.key, cx, hitLineY + 1);
+            }
+
+            // 3) Update & Render Notes when Playing / Countdown / Paused
+            if (state.mode === 'playing' || state.mode === 'countdown' || state.mode === 'paused') {
+                const now = state.mode === 'playing' ? getSongTime() : state.pausedAtSongTime;
+                state.currentSongTime = now;
+
+                if (state.mode === 'playing') {
+                    document.getElementById('timeDisplay').textContent = formatTime(now);
+
+                    // Update Live Lyrics Caption
+                    if (state.songTitle.includes('사랑하는 당신에게')) {
+                        let currentLyric = SONG_LYRICS[0].text;
+                        for (let k = 0; k < SONG_LYRICS.length; k++) {
+                            if (now >= SONG_LYRICS[k].time) {
+                                currentLyric = SONG_LYRICS[k].text;
+                            } else {
+                                break;
+                            }
+                        }
+                        document.getElementById('lyricsText').textContent = currentLyric;
+                    } else {
+                        document.getElementById('lyricsText').textContent = `🎵 ${state.songTitle} 연주 중 ~ ♪`;
+                    }
+
+                    // Check End of Song
+                    if (now >= state.duration) {
+                        finishGame(true);
+                    }
+                }
+
+                // Pixels per second based on speed multiplier
+                const pixelsPerSec = 310 * state.noteSpeed;
+
+                for (let i = 0; i < state.notes.length; i++) {
+                    const note = state.notes[i];
+                    if (note.hit || note.missed) continue;
+
+                    const timeDiff = note.time - now;
+
+                    // Check Miss
+                    if (state.mode === 'playing' && timeDiff < -0.32) {
+                        note.missed = true;
+                        state.stats.miss++;
+                        state.combo = 0;
+                        // Gentle HP decrease for kids (easy to survive)
+                        state.hp = Math.max(5, state.hp - (state.difficulty === 1 ? 2 : 4));
+                        triggerJudgmentPopup('힘내요! 화이팅! 🥺', 'text-gray-400');
+                        updateHudUI();
+                        continue;
+                    }
+
+                    const y = hitLineY - timeDiff * pixelsPerSec;
+                    if (y < -60 || y > h + 60) continue;
+
+                    // Draw Chiikawa-style Marshmallow Jelly Note
+                    const theme = LANE_THEMES[note.lane];
+                    const cx = note.lane * laneW + laneW / 2;
+                    const noteW = Math.min(laneW * 0.78, 76);
+                    const noteH = 34;
+
+                    // Cute Ears on top of jelly note
+                    ctx.fillStyle = theme.color;
+                    ctx.beginPath();
+                    ctx.arc(cx - noteW * 0.26, y - noteH * 0.45, 8, 0, Math.PI * 2);
+                    ctx.arc(cx + noteW * 0.26, y - noteH * 0.45, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Main Rounded Jelly Pill
+                    ctx.beginPath();
+                    ctx.roundRect(cx - noteW / 2, y - noteH / 2, noteW, noteH, 17);
+                    ctx.fillStyle = theme.color;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+
+                    // Cute Face Expression inside Note
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px "Jua", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(theme.face, cx, y + 1);
+                }
+            }
+
+            // 4) Draw Hit Particles
+            for (let i = state.particles.length - 1; i >= 0; i--) {
+                const p = state.particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.18;
+                p.alpha -= 0.03;
+
+                if (p.alpha <= 0) {
+                    state.particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.font = `${Math.floor(p.size)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(p.emoji, p.x, p.y);
+                ctx.restore();
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        /**
+         * =====================================================================
+         * 7. 이벤트 리스너 (키보드, 멀티터치, 파일 업로드, 설정 슬라이더)
+         * =====================================================================
+         */
+        // Keyboard Input (Q, W, E, R & Escape)
+        const KEY_MAP = { 'q': 0, 'ㅂ': 0, 'w': 1, 'ㅈ': 1, 'e': 2, 'ㄷ': 2, 'r': 3, 'ㄱ': 3 };
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const k = e.key.toLowerCase();
+            if (k === 'escape') {
+                if (state.mode === 'playing') pauseGame();
+                else if (state.mode === 'paused') resumeGame();
+                return;
+            }
+            if (k in KEY_MAP) {
+                handleLanePress(KEY_MAP[k]);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const k = e.key.toLowerCase();
+            if (k in KEY_MAP) {
+                handleLaneRelease(KEY_MAP[k]);
+            }
+        });
+
+        // Multi-Touch & Mouse Support for Large Bottom QWER Pads
+        for (let lane = 0; lane < 4; lane++) {
+            const btn = document.getElementById(`keyBtn-${lane}`);
+            
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleLanePress(lane);
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleLaneRelease(lane);
+            }, { passive: false });
+
+            btn.addEventListener('touchcancel', () => handleLaneRelease(lane));
+            btn.addEventListener('mousedown', () => handleLanePress(lane));
+            btn.addEventListener('mouseup', () => handleLaneRelease(lane));
+            btn.addEventListener('mouseleave', () => handleLaneRelease(lane));
+        }
+
+        // Difficulty Chip Selection
+        document.querySelectorAll('.diff-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                state.difficulty = Number(chip.dataset.diff);
+                document.querySelectorAll('.diff-chip').forEach(c => {
+                    c.classList.remove('bg-pink-400', 'text-white');
+                    c.classList.add('bg-pink-50', 'text-pink-500');
+                });
+                chip.classList.remove('bg-pink-50', 'text-pink-500');
+                chip.classList.add('bg-pink-400', 'text-white');
+            });
+        });
+
+        // Start Hosted Song Button (One-Click Play)
+        btnStartHostedSong.addEventListener('click', () => {
+            if (state.hostedBuffer) {
+                prepareAndStartGame('hosted');
+            } else {
+                showToast('song.mp3 파일이 없어 피아노 연습 반주로 시작합니다 🎹');
+                prepareAndStartGame('preset');
+            }
+        });
+
+        // Start Preset Piano Button
+        document.getElementById('btnStartPreset').addEventListener('click', () => {
+            prepareAndStartGame('preset');
+        });
+
+        // Manual File Upload (Immediate Decode & Auto-Start)
+        document.getElementById('mediaFileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showToast('🎵 음원 파일을 불러와 박자를 분석하고 있어요...');
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const audioCtx = ensureAudioContext();
+                const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+                const cleanName = file.name.replace(/\.[^/.]+$/, '');
+                prepareAndStartGame('uploaded', decoded, cleanName);
+            } catch (err) {
+                showToast('⚠️ 지원하지 않는 오디오 형식이거나 파일이 손상되었어요.');
+            }
+            e.target.value = '';
+        });
+
+        // Pause / Resume / Restart / Home Buttons
+        btnPause.addEventListener('click', pauseGame);
+        document.getElementById('btnResume').addEventListener('click', resumeGame);
+        document.getElementById('btnPauseRestart').addEventListener('click', restartCurrentGame);
+        document.getElementById('btnPauseHome').addEventListener('click', goHome);
+        document.getElementById('btnResultRestart').addEventListener('click', restartCurrentGame);
+        document.getElementById('btnResultHome').addEventListener('click', goHome);
+
+        // Settings Modal & Sync Sliders
+        document.getElementById('btnSettings').addEventListener('click', () => {
+            if (state.mode === 'playing') pauseGame();
+            settingsModal.classList.remove('hidden');
+            settingsModal.classList.add('flex');
+        });
+
+        document.getElementById('btnCloseSettings').addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+            settingsModal.classList.remove('flex');
+        });
+
+        const speedSlider = document.getElementById('speedSlider');
+        speedSlider.addEventListener('input', (e) => {
+            state.noteSpeed = parseFloat(e.target.value);
+            document.getElementById('speedValueDisplay').textContent = `${state.noteSpeed.toFixed(1)}x`;
+        });
+
+        function updateSyncOffset(val) {
+            state.syncOffsetMs = Number(val);
+            document.getElementById('pauseSyncSlider').value = state.syncOffsetMs;
+            document.getElementById('settingsSyncSlider').value = state.syncOffsetMs;
+            document.getElementById('pauseSyncValue').textContent = `${state.syncOffsetMs} ms`;
+            document.getElementById('settingsSyncValue').textContent = `${state.syncOffsetMs} ms`;
+        }
+
+        document.getElementById('pauseSyncSlider').addEventListener('input', (e) => updateSyncOffset(e.target.value));
+        document.getElementById('settingsSyncSlider').addEventListener('input', (e) => updateSyncOffset(e.target.value));
+
+        document.getElementById('toggleSfx').addEventListener('change', (e) => {
+            state.sfxEnabled = e.target.checked;
+        });
+
+        // Window Resize & Load Initialization
+        window.addEventListener('resize', resizeCanvases);
+        window.onload = function () {
+            resizeCanvases();
+            preloadHostedSong();
+            renderLoop();
+        };
+    </script>
+</body>
+</html>
